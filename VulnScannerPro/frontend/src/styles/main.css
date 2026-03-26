@@ -1,0 +1,424 @@
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --danger-color: #e74c3c;
+  --warning-color: #f39c12;
+  --success-color: #27ae60;
+  --info-color: #3498db;
+  --dark-bg: #1a1a2e;
+  --light-bg: #f5f5f5;
+  --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  --border-radius: 8px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--light-bg);
+  color: var(--primary-color);
+}
+
+.navbar {
+  background: linear-gradient(135deg, var(--primary-color), var(--dark-bg));
+  color: white;
+  padding: 1rem 2rem;
+  box-shadow: var(--card-shadow);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo h1 {
+  font-size: 1.5rem;
+}
+
+.badge {
+  background: var(--secondary-color);
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 12px;
+  margin-left: 10px;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+}
+
+.nav-menu a {
+  color: white;
+  text-decoration: none;
+  transition: opacity 0.3s;
+}
+
+.nav-menu a:hover {
+  opacity: 0.8;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--success-color);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Dashboard Styles */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-card h3 {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+
+.stat-trend {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
+.charts-container {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 1.5rem;
+}
+
+.chart-card, .recent-scans-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.scans-table {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+}
+
+.scans-table th,
+.scans-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.scans-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-right: 4px;
+}
+
+.badge.critical { background: #e74c3c; color: white; }
+.badge.high { background: #e67e22; color: white; }
+.badge.medium { background: #f39c12; color: white; }
+.badge.low { background: #27ae60; color: white; }
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.completed { background: #27ae60; color: white; }
+.status-badge.running { background: #3498db; color: white; }
+.status-badge.pending { background: #95a5a6; color: white; }
+.status-badge.failed { background: #e74c3c; color: white; }
+
+/* Scanner Styles */
+.scanner-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.scanner-form {
+  background: white;
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.form-group input[type="url"],
+.form-group input[type="email"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+}
+
+.form-group.checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.form-group.checkbox label {
+  margin: 0;
+  margin-left: 0.5rem;
+}
+
+.scan-button {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.scan-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.scan-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.progress-container {
+  margin-top: 1rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--secondary-color), #2980b9);
+  transition: width 0.3s;
+}
+
+.progress-text {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.results-container {
+  margin-top: 2rem;
+}
+
+.severity-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.severity-card {
+  text-align: center;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  color: white;
+}
+
+.severity-card.critical { background: #e74c3c; }
+.severity-card.high { background: #e67e22; }
+.severity-card.medium { background: #f39c12; }
+.severity-card.low { background: #27ae60; }
+
+.severity-count {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.severity-label {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.vulnerabilities-list {
+  margin-bottom: 2rem;
+}
+
+.vulnerability-item {
+  background: white;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius);
+  border-left: 4px solid;
+  box-shadow: var(--card-shadow);
+}
+
+.vulnerability-item.critical { border-left-color: #e74c3c; }
+.vulnerability-item.high { border-left-color: #e67e22; }
+.vulnerability-item.medium { border-left-color: #f39c12; }
+.vulnerability-item.low { border-left-color: #27ae60; }
+
+.vuln-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.vuln-type {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.vuln-severity {
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.vulnerability-item.critical .vuln-severity {
+  background: #e74c3c;
+  color: white;
+}
+
+.vulnerability-item.high .vuln-severity {
+  background: #e67e22;
+  color: white;
+}
+
+.vulnerability-item.medium .vuln-severity {
+  background: #f39c12;
+  color: white;
+}
+
+.vulnerability-item.low .vuln-severity {
+  background: #27ae60;
+  color: white;
+}
+
+.vuln-description {
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.vuln-location {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin-bottom: 0.5rem;
+  font-family: monospace;
+}
+
+.vuln-remediation {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.9rem;
+}
+
+.report-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.report-actions button {
+  padding: 0.75rem 1.5rem;
+  background: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.report-actions button:hover {
+  background: #2980b9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .charts-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .severity-summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .nav-menu {
+    display: none;
+  }
+}

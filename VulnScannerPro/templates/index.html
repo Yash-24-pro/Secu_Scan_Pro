@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerability Scanner Pro | Advanced Security Scanner</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        body.dark-mode .scanner-card,
+        body.dark-mode .chart-card,
+        body.dark-mode .vulns-card,
+        body.dark-mode .score-card,
+        body.dark-mode .detailed-card {
+            background: rgba(30, 30, 46, 0.95);
+            color: #fff;
+        }
+
+        body.dark-mode .url-input {
+            background: #2d2d44;
+            color: #fff;
+            border-color: #4d4d66;
+        }
+
+        body.dark-mode .vuln-item {
+            background: rgba(45, 45, 68, 0.8);
+            color: #fff;
+        }
+
+        body.dark-mode .stats-badge {
+            background: rgba(102, 126, 234, 0.2);
+            color: #fff;
+        }
+
+        body.dark-mode .detail-item {
+            background: rgba(45, 45, 68, 0.6);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header with Buttons */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .header-buttons {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Scanner Card */
+        .scanner-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .scan-btn {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .scan-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .scan-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 20px;
+        }
+
+        .progress-bar-wrapper {
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 35px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .progress-message {
+            margin-top: 10px;
+            text-align: center;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Export Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-btn.pdf {
+            background: #dc3545;
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .export-btn.pdf:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .export-btn.json {
+            background: #28a745;
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .export-btn.json:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .export-btn.csv {
+            background: #17a2b8;
+            color: white;
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        }
+
+        .export-btn.csv:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+
+        /* Loading Animation */
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loader.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Results Grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .score-number {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .score-rating {
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .vulns-card {
+            grid-column: span 2;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .vulns-card h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Detailed Card */
+        .detailed-card {
+            grid-column: span 2;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+
+        .detailed-card h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .detail-section {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .detail-section h4 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .detail-item {
+            margin: 8px 0;
+            padding: 8px;
+            border-left: 3px solid;
+            padding-left: 12px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .detail-item.good { border-left-color: #28a745; }
+        .detail-item.warning { border-left-color: #ffc107; }
+        .detail-item.critical { border-left-color: #dc3545; }
+        .detail-item.info { border-left-color: #17a2b8; }
+
+        .technology-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            margin: 5px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .vuln-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 4px solid;
+            background: #f8f9fa;
+            transition: transform 0.2s;
+        }
+
+        .vuln-item:hover {
+            transform: translateX(5px);
+        }
+
+        .vuln-item.critical {
+            border-left-color: #dc3545;
+            background: linear-gradient(90deg, #fff5f5 0%, white 100%);
+        }
+
+        .vuln-item.high {
+            border-left-color: #fd7e14;
+            background: linear-gradient(90deg, #fff8f0 0%, white 100%);
+        }
+
+        .vuln-item.medium {
+            border-left-color: #ffc107;
+            background: linear-gradient(90deg, #fffef5 0%, white 100%);
+        }
+
+        .vuln-item.low {
+            border-left-color: #28a745;
+            background: linear-gradient(90deg, #f5fff5 0%, white 100%);
+        }
+
+        .vuln-severity {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .vuln-severity.critical {
+            background: #dc3545;
+            color: white;
+        }
+
+        .vuln-severity.high {
+            background: #fd7e14;
+            color: white;
+        }
+
+        .vuln-severity.medium {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .vuln-severity.low {
+            background: #28a745;
+            color: white;
+        }
+
+        .vuln-type {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .stats-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .recommendation-item {
+            padding: 10px;
+            margin: 8px 0;
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            border-radius: 5px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            .vulns-card, .detailed-card {
+                grid-column: span 1;
+            }
+            .input-group {
+                flex-direction: column;
+            }
+            .header-buttons {
+                position: static;
+                justify-content: center;
+                margin-top: 15px;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-buttons">
+                <button class="icon-btn" onclick="toggleDarkMode()" title="Dark Mode">🌙</button>
+                <button class="icon-btn" onclick="shareResults()" title="Share">📤</button>
+            </div>
+            <h1>🛡️ Vulnerability Scanner Pro</h1>
+            <p>Advanced Security Analysis with Real-time Progress Tracking</p>
+        </div>
+
+        <div class="scanner-card">
+            <div class="input-group">
+                <input type="url" id="urlInput" class="url-input" 
+                       placeholder="https://example.com" value="https://example.com">
+                <button id="scanBtn" class="scan-btn">🔍 SCAN NOW</button>
+            </div>
+            
+            <div class="loader" id="loader">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">🔒 Analyzing security vulnerabilities...</p>
+            </div>
+
+            <!-- Export Buttons -->
+            <div class="export-buttons" id="exportButtons" style="display: none;">
+                <button class="export-btn pdf" onclick="exportPDF()">📄 Export PDF</button>
+                <button class="export-btn json" onclick="exportJSON()">📋 Export JSON</button>
+                <button class="export-btn csv" onclick="exportCSV()">📊 Export CSV</button>
+            </div>
+        </div>
+
+        <div id="results" style="display: none;">
+            <div class="results-grid">
+                <div class="score-card">
+                    <h3>🔐 Security Score</h3>
+                    <div class="score-number" id="score">0</div>
+                    <div class="score-rating" id="rating">-</div>
+                </div>
+                
+                <div class="chart-card">
+                    <h3>📊 Vulnerability Distribution</h3>
+                    <canvas id="vulnChart"></canvas>
+                    <div style="text-align: center; margin-top: 15px;" id="chartStats"></div>
+                </div>
+                
+                <div class="vulns-card">
+                    <h3>⚠️ Detected Vulnerabilities</h3>
+                    <div id="vulnList"></div>
+                </div>
+
+                <div class="detailed-card" id="detailedCard" style="display: none;">
+                    <h3>🔍 Detailed Security Analysis</h3>
+                    <div id="detailedChecks"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart = null;
+        let currentResults = null;
+        let currentUrl = '';
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.background = type === 'success' ? '#28a745' : '#dc3545';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function updateProgress(percent, message) {
+            let progressBar = document.getElementById('progressBar');
+            let progressMsg = document.getElementById('progressMessage');
+            
+            if (!progressBar) {
+                const progressHTML = `
+                    <div class="progress-container" id="scanProgress">
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar" id="progressBar">0%</div>
+                        </div>
+                        <div class="progress-message" id="progressMessage"></div>
+                    </div>
+                `;
+                document.querySelector('.scanner-card').insertAdjacentHTML('beforeend', progressHTML);
+                progressBar = document.getElementById('progressBar');
+                progressMsg = document.getElementById('progressMessage');
+            }
+            
+            if (progressBar) {
+                progressBar.style.width = percent + '%';
+                progressBar.textContent = percent + '%';
+            }
+            if (progressMsg) {
+                progressMsg.textContent = message;
+            }
+        }
+
+        function removeProgress() {
+            const progressDiv = document.getElementById('scanProgress');
+            if (progressDiv) progressDiv.remove();
+        }
+
+        // Export Functions
+        function exportPDF() {
+            if (!currentResults) {
+                showToast('No scan results to export!', 'error');
+                return;
+            }
+
+            const element = document.createElement('div');
+            element.innerHTML = `
+                <div style="padding: 20px; font-family: Arial;">
+                    <h1 style="color: #667eea;">Vulnerability Scan Report</h1>
+                    <hr>
+                    <p><strong>URL:</strong> ${currentUrl}</p>
+                    <p><strong>Scan Date:</strong> ${new Date().toLocaleString()}</p>
+                    <p><strong>Security Score:</strong> ${currentResults.security_score}/100</p>
+                    <p><strong>Rating:</strong> ${getRatingText(currentResults.security_score)}</p>
+                    <hr>
+                    <h2>Vulnerabilities Found: ${currentResults.vulnerabilities.length}</h2>
+                    ${currentResults.vulnerabilities.map(v => `
+                        <div style="margin: 10px 0; padding: 10px; border-left: 4px solid ${getSeverityColor(v.severity)}; background: #f5f5f5;">
+                            <strong>${v.type}</strong><br>
+                            <span style="color: ${getSeverityColor(v.severity)}">Severity: ${v.severity.toUpperCase()}</span>
+                        </div>
+                    `).join('')}
+                    <hr>
+                    <p><em>Generated by Vulnerability Scanner Pro</em></p>
+                </div>
+            `;
+            
+            html2pdf().from(element).set({
+                margin: 1,
+                filename: `vuln_scan_${currentUrl.replace(/[^a-z0-9]/gi, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            }).save();
+            
+            showToast('PDF report generated successfully! 📄');
+        }
+
+        function exportJSON() {
+            if (!currentResults) {
+                showToast('No scan results to export!', 'error');
+                return;
+            }
+
+            const exportData = {
+                url: currentUrl,
+                scan_date: new Date().toISOString(),
+                security_score: currentResults.security_score,
+                vulnerabilities: currentResults.vulnerabilities,
+                categories: currentResults.categories,
+                technologies: currentResults.technologies,
+                detailed_checks: currentResults.detailed_checks,
+                recommendations: currentResults.recommendations
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `vuln_scan_${currentUrl.replace(/[^a-z0-9]/gi, '_')}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('JSON report exported successfully! 📋');
+        }
+
+        function exportCSV() {
+            if (!currentResults) {
+                showToast('No scan results to export!', 'error');
+                return;
+            }
+
+            const headers = ['Type', 'Severity', 'Description'];
+            const rows = currentResults.vulnerabilities.map(v => [
+                `"${v.type}"`,
+                v.severity,
+                `"${v.description || ''}"`
+            ]);
+            
+            const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+            const dataBlob = new Blob([csvContent], {type: 'text/csv'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `vuln_scan_${currentUrl.replace(/[^a-z0-9]/gi, '_')}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('CSV report exported successfully! 📊');
+        }
+
+        function getRatingText(score) {
+            if (score >= 80) return 'Excellent 🎉';
+            if (score >= 60) return 'Good ⚠️';
+            if (score >= 40) return 'Needs Improvement 🔴';
+            if (score >= 20) return 'Poor 💀';
+            return 'Critical 🔥';
+        }
+
+        function getSeverityColor(severity) {
+            const colors = {
+                critical: '#dc3545',
+                high: '#fd7e14',
+                medium: '#ffc107',
+                low: '#28a745'
+            };
+            return colors[severity] || '#666';
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+            showToast(document.body.classList.contains('dark-mode') ? 'Dark mode enabled 🌙' : 'Light mode enabled ☀️');
+        }
+
+        function shareResults() {
+            if (!currentResults) {
+                showToast('No results to share!', 'error');
+                return;
+            }
+            
+            const text = `🔒 Security scan of ${currentUrl} scored ${currentResults.security_score}/100! Found ${currentResults.vulnerabilities.length} vulnerabilities. #VulnerabilityScanner #Security`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Vulnerability Scan Report',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(text);
+                showToast('Results copied to clipboard! 📋');
+            }
+        }
+
+        function displayDetailedChecks(data) {
+            if (!data.detailed_checks) return;
+            
+            let html = '';
+            
+            // Display Technologies
+            if (data.technologies && data.technologies.length > 0) {
+                html += `
+                    <div class="detail-section">
+                        <h4>🔧 Detected Technologies</h4>
+                        <div>
+                            ${data.technologies.map(tech => `<span class="technology-badge">${tech}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Display Detailed Checks
+            for (const [category, checks] of Object.entries(data.detailed_checks)) {
+                if (checks && checks.length > 0) {
+                    html += `
+                        <div class="detail-section">
+                            <h4>${category}</h4>
+                    `;
+                    
+                    if (Array.isArray(checks)) {
+                        checks.forEach(check => {
+                            if (typeof check === 'object') {
+                                const statusClass = check.status === 'Good' ? 'good' : 
+                                                  check.status === 'Warning' ? 'warning' : 
+                                                  check.status === 'Critical' ? 'critical' : 'info';
+                                html += `
+                                    <div class="detail-item ${statusClass}">
+                                        <strong>${check.check || 'Item'}:</strong> ${check.value || JSON.stringify(check)}
+                                        ${check.description ? `<br><small>${check.description}</small>` : ''}
+                                    </div>
+                                `;
+                            } else if (typeof check === 'string') {
+                                html += `<div class="detail-item info">${check}</div>`;
+                            }
+                        });
+                    } else if (typeof checks === 'string') {
+                        html += `<div class="detail-item info">${checks}</div>`;
+                    }
+                    
+                    html += `</div>`;
+                }
+            }
+            
+            // Display Recommendations
+            if (data.recommendations && data.recommendations.length > 0) {
+                html += `
+                    <div class="detail-section">
+                        <h4>💡 Recommendations</h4>
+                        ${data.recommendations.map(rec => `
+                            <div class="recommendation-item">
+                                📌 ${rec}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('detailedChecks').innerHTML = html;
+            document.getElementById('detailedCard').style.display = 'block';
+        }
+
+        // Load saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Scan button click handler
+        document.getElementById('scanBtn').addEventListener('click', async () => {
+            const url = document.getElementById('urlInput').value;
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            currentUrl = url;
+            document.getElementById('loader').classList.add('active');
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('exportButtons').style.display = 'none';
+            document.getElementById('scanBtn').disabled = true;
+            
+            // Remove existing progress if any
+            removeProgress();
+
+            try {
+                const response = await fetch('/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                currentResults = data;
+                updateResults(data);
+                displayDetailedChecks(data);
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('exportButtons').style.display = 'flex';
+                
+                // Remove progress display after completion
+                removeProgress();
+                
+            } catch (error) {
+                alert('Error scanning website: ' + error.message);
+                removeProgress();
+            } finally {
+                document.getElementById('loader').classList.remove('active');
+                document.getElementById('scanBtn').disabled = false;
+            }
+        });
+
+        function updateResults(data) {
+            const score = data.security_score;
+            document.getElementById('score').textContent = score;
+            
+            let rating = '';
+            let emoji = '';
+            if (score >= 80) {
+                rating = 'Excellent! 🎉';
+                emoji = '🟢';
+            } else if (score >= 60) {
+                rating = 'Good - Some issues ⚠️';
+                emoji = '🟡';
+            } else if (score >= 40) {
+                rating = 'Needs Improvement 🔴';
+                emoji = '🟠';
+            } else if (score >= 20) {
+                rating = 'Poor - High Risk 💀';
+                emoji = '🔴';
+            } else {
+                rating = 'Critical - Immediate Action! 🔥';
+                emoji = '💀';
+            }
+            document.getElementById('rating').textContent = `${emoji} ${rating}`;
+            
+            const ctx = document.getElementById('vulnChart').getContext('2d');
+            if (chart) {
+                chart.destroy();
+            }
+            
+            const critical = data.categories.critical || 0;
+            const high = data.categories.high || 0;
+            const medium = data.categories.medium || 0;
+            const low = data.categories.low || 0;
+            const total = critical + high + medium + low;
+            
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Critical', 'High', 'Medium', 'Low'],
+                    datasets: [{
+                        data: [critical, high, medium, low],
+                        backgroundColor: [
+                            'rgba(220, 53, 69, 0.9)',
+                            'rgba(253, 126, 20, 0.9)',
+                            'rgba(255, 193, 7, 0.9)',
+                            'rgba(40, 167, 69, 0.9)'
+                        ],
+                        borderWidth: 2,
+                        hoverOffset: 15,
+                        cutout: '60%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 12, weight: 'bold' },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 2000
+                    }
+                }
+            });
+            
+            const chartStats = document.getElementById('chartStats');
+            if (total > 0) {
+                chartStats.innerHTML = `
+                    <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                        <span class="stats-badge">🔴 Critical: ${critical}</span>
+                        <span class="stats-badge">🟠 High: ${high}</span>
+                        <span class="stats-badge">🟡 Medium: ${medium}</span>
+                        <span class="stats-badge">🟢 Low: ${low}</span>
+                        <span class="stats-badge">📊 Total: ${total}</span>
+                    </div>
+                `;
+            } else {
+                chartStats.innerHTML = '<span class="stats-badge">✅ No vulnerabilities found!</span>';
+            }
+            
+            const vulnList = document.getElementById('vulnList');
+            if (data.vulnerabilities.length === 0) {
+                vulnList.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">✅</div>
+                        <div style="font-size: 1.2rem; color: #28a745;">No vulnerabilities found!</div>
+                        <div style="color: #666; margin-top: 10px;">The website looks secure.</div>
+                    </div>
+                `;
+            } else {
+                vulnList.innerHTML = '';
+                data.vulnerabilities.forEach((vuln, index) => {
+                    const severityIcons = {
+                        critical: '💀',
+                        high: '🔴',
+                        medium: '🟡',
+                        low: '🟢'
+                    };
+                    const icon = severityIcons[vuln.severity] || '⚠️';
+                    
+                    const vulnDiv = document.createElement('div');
+                    vulnDiv.className = `vuln-item ${vuln.severity}`;
+                    vulnDiv.innerHTML = `
+                        <span class="vuln-severity ${vuln.severity}">${icon} ${vuln.severity.toUpperCase()}</span>
+                        <div class="vuln-type">${vuln.type}</div>
+                        ${vuln.description ? `<div style="margin-top: 5px; color: #666;">${vuln.description}</div>` : ''}
+                        ${vuln.location ? `<div style="margin-top: 5px; font-size: 0.85rem; color: #999;">📍 ${vuln.location}</div>` : ''}
+                    `;
+                    vulnList.appendChild(vulnDiv);
+                });
+            }
+        }
+// Replace the scan button click handler in your existing index.html with this:
+document.getElementById('scanBtn').addEventListener('click', async () => {
+    const url = document.getElementById('urlInput').value;
+    if (!url) {
+        alert('Please enter a URL');
+        return;
+    }
+
+    currentUrl = url;
+    document.getElementById('loader').classList.add('active');
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('exportButtons').style.display = 'none';
+    document.getElementById('scanBtn').disabled = true;
+    
+    // Remove existing progress if any
+    removeProgress();
+
+    try {
+        const response = await fetch('/scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url: url })
+        });
+
+        const data = await response.json();
+        
+        if (data.error) {
+            alert('Error: ' + data.error);
+            return;
+        }
+
+        currentResults = data;
+        updateResults(data);
+        displayDetailedChecks(data);
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('exportButtons').style.display = 'flex';
+        
+        // Remove progress display after completion
+        removeProgress();
+        
+    } catch (error) {
+        alert('Error scanning website: ' + error.message);
+        removeProgress();
+    } finally {
+        document.getElementById('loader').classList.remove('active');
+        document.getElementById('scanBtn').disabled = false;
+    }
+});
+
+// Add this function to display progress with percentages
+function updateProgress(percent, message) {
+    let progressBar = document.getElementById('progressBar');
+    let progressMsg = document.getElementById('progressMessage');
+    let progressPercent = document.getElementById('progressPercent');
+    
+    if (!progressBar) {
+        const progressHTML = `
+            <div class="progress-container" id="scanProgress" style="margin-top: 20px;">
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar" id="progressBar" style="width: 0%; height: 40px; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1rem;">
+                        0%
+                    </div>
+                </div>
+                <div class="progress-message" id="progressMessage" style="margin-top: 10px; text-align: center; color: #666; font-weight: 500;"></div>
+            </div>
+        `;
+        document.querySelector('.scanner-card').insertAdjacentHTML('beforeend', progressHTML);
+        progressBar = document.getElementById('progressBar');
+        progressMsg = document.getElementById('progressMessage');
+    }
+    
+    if (progressBar) {
+        progressBar.style.width = percent + '%';
+        progressBar.textContent = percent + '%';
+    }
+    if (progressMsg) {
+        progressMsg.textContent = message;
+    }
+}
+
+function removeProgress() {
+    const progressDiv = document.getElementById('scanProgress');
+    if (progressDiv) progressDiv.remove();
+}
+        // Auto-scan on load
+        setTimeout(() => {
+            document.getElementById('scanBtn').click();
+        }, 500);
+    </script>
+</body>
+</html>
